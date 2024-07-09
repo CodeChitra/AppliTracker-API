@@ -1,6 +1,6 @@
 require("dotenv").config();
 require("express-async-errors");
-
+const cors = require("cors");
 const path = require("path");
 
 // extra security packages
@@ -20,8 +20,20 @@ const jobsRouter = require("./routes/jobs");
 // error handler
 const notFoundMiddleware = require("./middleware/not-found");
 const errorHandlerMiddleware = require("./middleware/error-handler");
+const { BadRequestError } = require("./errors");
 
 // express middlewares
+const allowedOrigins = ["https://appli-tracker.netlify.app"];
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new BadRequestError("Not Allowed By Cors."));
+    }
+  },
+};
+app.use(cors(corsOptions));
 app.use(express.static(path.resolve(__dirname, "./client/build")));
 app.use(express.json());
 app.use(helmet());
